@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTasks } from '../store/taskSlice';
 import TaskItem from '../components/TaskItem';
@@ -7,11 +7,14 @@ import { RootState } from '../store';
 
 const TaskListScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const tasks = useSelector((state: RootState) => state.tasks.tasks);
+  const { tasks, status } = useSelector((state: RootState) => state.tasks);
   const [filter, setFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dispatch(fetchTasks());
+    dispatch(fetchTasks()).then(() => {
+      setTimeout(() => setLoading(false), 2000);  // Show loader for 2 seconds
+    });
   }, [dispatch]);
 
   const filteredTasks = tasks.filter(task => {
@@ -19,6 +22,14 @@ const TaskListScreen = ({ navigation }) => {
     if (filter === 'pending') return !task.completed;
     return true;
   });
+
+  if (loading || status === 'loading') {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -70,6 +81,11 @@ const styles = StyleSheet.create({
   activeFilter: {
     fontWeight: 'bold',
     color: '#007AFF',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addButton: {
     position: 'absolute',

@@ -12,6 +12,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onPress }) => {
     <TouchableOpacity onPress={onPress}>
       <View style={styles.container}>
         <Text style={styles.title}>{task.todo}</Text>
+        <Text style={styles.priorityTag}>Priority: {task.priority}</Text>
         <Text style={[styles.status, task.completed ? styles.completed : styles.pending]}>
           {task.completed ? 'Completed' : 'Pending'}
         </Text>
@@ -29,6 +30,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
+  },
+  priorityTag: {
+    fontSize: 14,
+    color: '#333',
+    marginTop: 5,
+    fontWeight: 'bold',
   },
   status: {
     fontSize: 14,

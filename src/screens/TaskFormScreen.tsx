@@ -3,6 +3,7 @@ import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-nativ
 import { useDispatch, useSelector } from 'react-redux';
 import { addTask, updateTask } from '../store/taskSlice';
 import { RootState } from '../store';
+import PrioritySelector from '../components/PrioritySelector';
 
 const TaskFormScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -12,6 +13,7 @@ const TaskFormScreen = ({ route, navigation }) => {
   );
 
   const [todo, setTodo] = useState(task ? task.todo : '');
+  const [priority, setPriority] = useState(task ? task.priority : 'Low');
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
@@ -21,9 +23,18 @@ const TaskFormScreen = ({ route, navigation }) => {
   const handleSubmit = () => {
     if (isValid) {
       if (task) {
-        dispatch(updateTask({ id: taskId, changes: { todo } }));
+        // Preserve existing properties (e.g., completed) while updating todo and priority
+        dispatch(updateTask({
+          id: taskId,
+          changes: {
+            ...task, // Keep existing task properties (like completed)
+            todo,
+            priority, // Update the priority
+          }
+        }));
       } else {
-        dispatch(addTask({ todo, completed: false }));
+        // For new task creation
+        dispatch(addTask({ todo, completed: false, priority }));
       }
       navigation.goBack();
     }
@@ -37,6 +48,7 @@ const TaskFormScreen = ({ route, navigation }) => {
         onChangeText={setTodo}
         placeholder="Enter task"
       />
+      <PrioritySelector priority={priority} onSelect={setPriority} />
       <TouchableOpacity
         style={[styles.button, !isValid && styles.disabledButton]}
         onPress={handleSubmit}

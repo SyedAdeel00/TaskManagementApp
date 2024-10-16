@@ -27,6 +27,7 @@ const TaskDetailScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{task.todo}</Text>
+      <Text style={styles.priority}>Priority: {task.priority}</Text>
       <Text style={styles.status}>Status: {task.completed ? 'Completed' : 'Pending'}</Text>
       <TouchableOpacity style={styles.button} onPress={handleToggleCompletion}>
         <Text style={styles.buttonText}>
@@ -53,6 +54,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  priority: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 10,
+    fontWeight: 'bold',
   },
   status: {
     fontSize: 18,
