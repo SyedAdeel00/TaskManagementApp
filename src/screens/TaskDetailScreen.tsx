@@ -16,12 +16,12 @@ const TaskDetailScreen = ({ route, navigation }) => {
   }
 
   const handleDelete = () => {
-    dispatch(deleteTask(taskId));
+    dispatch(deleteTask(taskId)); // Handle deletion
     navigation.goBack();
   };
 
   const handleToggleCompletion = () => {
-    dispatch(toggleTaskCompletion(taskId));
+    dispatch(toggleTaskCompletion(taskId)); // Toggle completion status
   };
 
   return (

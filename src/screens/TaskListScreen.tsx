@@ -7,7 +7,7 @@ import { RootState } from '../store';
 
 const TaskListScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { tasks, status } = useSelector((state: RootState) => state.tasks);
+  const { tasks, status, error } = useSelector((state: RootState) => state.tasks);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +52,7 @@ const TaskListScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
           />
         )}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()} // Ensure the id exists
       />
       <TouchableOpacity
         style={styles.addButton}

@@ -52,6 +52,16 @@ export const updateTask = createAsyncThunk(
   }
 );
 
+// Async action to delete a task
+export const deleteTask = createAsyncThunk('tasks/deleteTask', async (id: number, { rejectWithValue }) => {
+  try {
+    // Simulate API call for delete if needed
+    return id; // Return the id for deletion
+  } catch (error) {
+    return rejectWithValue('Failed to delete task');
+  }
+});
+
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
@@ -91,6 +101,12 @@ const tasksSlice = createSlice({
         if (index !== -1) {
           state.tasks[index] = { ...state.tasks[index], ...changes };  // Update task with changes
         }
+      })
+      
+      // Delete Task
+      .addCase(deleteTask.fulfilled, (state, action) => {
+        const id = action.payload;
+        state.tasks = state.tasks.filter((t) => t.id !== id);  // Remove deleted task
       });
   },
 });

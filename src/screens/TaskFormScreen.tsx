@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { addTask, updateTask } from '../store/taskSlice';
+import { addTaskLocally, updateTask } from '../store/taskSlice';
 import { RootState } from '../store';
 import PrioritySelector from '../components/PrioritySelector';
 
@@ -23,18 +23,18 @@ const TaskFormScreen = ({ route, navigation }) => {
   const handleSubmit = () => {
     if (isValid) {
       if (task) {
-        // Preserve existing properties (e.g., completed) while updating todo and priority
+        // For updating an existing task
         dispatch(updateTask({
           id: taskId,
           changes: {
-            ...task, // Keep existing task properties (like completed)
+            ...task, // Keep existing task properties
             todo,
             priority, // Update the priority
           }
         }));
       } else {
-        // For new task creation
-        dispatch(addTask({ todo, completed: false, priority }));
+        // For adding a new local task
+        dispatch(addTaskLocally({ todo, completed: false, priority }));
       }
       navigation.goBack();
     }
