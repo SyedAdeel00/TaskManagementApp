@@ -12,14 +12,20 @@ export const fetchTodoById = async (id: number) => {
   return await response.json();
 };
 
-// Add a new task
-export const addTodo = async (task: { todo: string; completed: boolean; userId: number; priority: string }) => {
+// API call to add a task (send only the required fields)
+export const addTodo = async (task: { todo: string; completed: boolean; userId: number }) => {
   const response = await fetch(`${API_URL}/add`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(task),
   });
-  return await response.json();
+
+  // Ensure the response contains the newly created task with an ID
+  const newTask = await response.json();
+  if (!newTask.id) {
+    throw new Error("Task creation failed: ID not returned");
+  }
+  return newTask;
 };
 
 // Update a task

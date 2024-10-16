@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchTodos } from '../services/api';
+import { fetchTodos, addTodo } from '../services/api';
 import { Task } from '../types/task';
 
 interface TasksState {
@@ -34,9 +34,26 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (_, { rejec
   }
 });
 
-// Add a new local task (not sent to API)
-export const addTaskLocally = createAsyncThunk('tasks/addTaskLocally', async (task: Partial<Task>) => {
-  return { ...task, id: Date.now(), priority: task.priority || getRandomPriority() }; // Assign ID and random priority
+// Async action to add a task both to the API and locally (with extra fields)
+export const addTask = createAsyncThunk('tasks/addTask', async (taskData: { title: string, completed: boolean, userId: number, priority: string, deadline: string, description: string }, { rejectWithValue }) => {
+  try {
+    // Send the task to the API
+    const response = await addTodo({
+      todo: taskData.title,
+      completed: taskData.completed,
+      userId: taskData.userId
+    });
+
+    // Return the full task (including local fields)
+    return {
+      ...response, // API response (id, todo, completed, userId)
+      priority: taskData.priority, // Add priority
+      deadline: taskData.deadline, // Add deadline
+      description: taskData.description, // Add description
+    };
+  } catch (error) {
+    return rejectWithValue('Failed to add task');
+  }
 });
 
 // Update task (for both API and local tasks)
@@ -89,9 +106,12 @@ const tasksSlice = createSlice({
         state.error = action.payload as string;
       })
       
-      // Add Task Locally
-      .addCase(addTaskLocally.fulfilled, (state, action) => {
-        state.tasks.push(action.payload);  // Add the new local task
+      // Add Task to API and Locally
+      .addCase(addTask.fulfilled, (state, action) => {
+        state.tasks.push(action.payload);  // Push the new task into the Redux store
+      })
+      .addCase(addTask.rejected, (state, action) => {
+        state.error = action.payload as string;
       })
       
       // Update Task

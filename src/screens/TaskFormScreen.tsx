@@ -1,41 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { addTaskLocally, updateTask } from '../store/taskSlice';
-import { RootState } from '../store';
+import { useDispatch } from 'react-redux';
+import { addTask } from '../store/taskSlice';
 import PrioritySelector from '../components/PrioritySelector';
+import { isFutureDate } from '../utils/DateUtils';
 
 const TaskFormScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
-  const { taskId } = route.params || {};
-  const task = useSelector((state: RootState) => 
-    state.tasks.tasks.find(t => t.id === taskId)
-  );
-
-  const [todo, setTodo] = useState(task ? task.todo : '');
-  const [priority, setPriority] = useState(task ? task.priority : 'Low');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [deadline, setDeadline] = useState('');
+  const [priority, setPriority] = useState('Low');
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
-    setIsValid(todo.trim().length > 0);
-  }, [todo]);
+    // Ensure form is valid when title and deadline are filled correctly
+    setIsValid(title.trim().length > 0 && isFutureDate(deadline));
+  }, [title, deadline]);
 
   const handleSubmit = () => {
     if (isValid) {
-      if (task) {
-        // For updating an existing task
-        dispatch(updateTask({
-          id: taskId,
-          changes: {
-            ...task, // Keep existing task properties
-            todo,
-            priority, // Update the priority
-          }
-        }));
-      } else {
-        // For adding a new local task
-        dispatch(addTaskLocally({ todo, completed: false, priority }));
-      }
+      // Dispatch the action to add the task (both to API and locally)
+      dispatch(addTask({
+        title,
+        completed: false,
+        userId: 5, // Assuming userId is static or dynamic
+        priority,
+        deadline,
+        description,
+      }));
+
       navigation.goBack();
     }
   };
@@ -44,9 +38,21 @@ const TaskFormScreen = ({ route, navigation }) => {
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        value={todo}
-        onChangeText={setTodo}
-        placeholder="Enter task"
+        value={title}
+        onChangeText={setTitle}
+        placeholder="Enter task title"
+      />
+      <TextInput
+        style={styles.input}
+        value={description}
+        onChangeText={setDescription}
+        placeholder="Enter task description (optional)"
+      />
+      <TextInput
+        style={styles.input}
+        value={deadline}
+        onChangeText={setDeadline}
+        placeholder="Enter deadline (YYYY-MM-DD)"
       />
       <PrioritySelector priority={priority} onSelect={setPriority} />
       <TouchableOpacity
@@ -54,7 +60,7 @@ const TaskFormScreen = ({ route, navigation }) => {
         onPress={handleSubmit}
         disabled={!isValid}
       >
-        <Text style={styles.buttonText}>{task ? 'Update Task' : 'Add Task'}</Text>
+        <Text style={styles.buttonText}>Add Task</Text>
       </TouchableOpacity>
     </View>
   );
