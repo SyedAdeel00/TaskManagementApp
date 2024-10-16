@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { fetchTodos, addTodo } from '../services/api';
+import { fetchTodos, addTodo, updateTodo, deleteTodo } from '../services/api';
 import { Task } from '../types/task';
 
 interface TasksState {
@@ -20,13 +20,15 @@ const getRandomPriority = (): 'Low' | 'Medium' | 'High' => {
   return priorities[Math.floor(Math.random() * priorities.length)];
 };
 
-// Async action to fetch tasks and assign random priorities
+// Async action to fetch tasks and assign random priorities locally
 export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (_, { rejectWithValue }) => {
   try {
     const response = await fetchTodos();
     const tasksWithPriority = response.todos.map((task) => ({
       ...task,
-      priority: getRandomPriority(),  // Add random priority to each API task
+      priority: getRandomPriority(),  // Assign random priority locally
+      deadline: task.deadline || '',  // Initialize deadline
+      description: task.description || '',  // Initialize description
     }));
     return tasksWithPriority;
   } catch (error) {
@@ -34,35 +36,41 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (_, { rejec
   }
 });
 
-// Async action to add a task both to the API and locally (with extra fields)
+// Async action to add a task to the API and locally
 export const addTask = createAsyncThunk('tasks/addTask', async (taskData: { title: string, completed: boolean, userId: number, priority: string, deadline: string, description: string }, { rejectWithValue }) => {
   try {
-    // Send the task to the API
     const response = await addTodo({
       todo: taskData.title,
       completed: taskData.completed,
       userId: taskData.userId
     });
 
-    // Return the full task (including local fields)
     return {
-      ...response, // API response (id, todo, completed, userId)
-      priority: taskData.priority, // Add priority
-      deadline: taskData.deadline, // Add deadline
-      description: taskData.description, // Add description
+      ...response,          // API response: id, todo, completed, userId
+      priority: taskData.priority,
+      deadline: taskData.deadline,
+      description: taskData.description,
     };
   } catch (error) {
     return rejectWithValue('Failed to add task');
   }
 });
 
-// Update task (for both API and local tasks)
+// Update a task (for API and local)
 export const updateTask = createAsyncThunk(
   'tasks/updateTask',
   async ({ id, changes }: { id: number; changes: Partial<Task> }, { rejectWithValue }) => {
     try {
-      // Simulate API call for update if needed
-      return { id, changes }; // Return id and changes for local handling
+      const response = await updateTodo(id, {
+        todo: changes.title,
+        completed: changes.completed
+      });
+
+      return {
+        id,
+        ...response,
+        ...changes, // Include local fields
+      };
     } catch (error) {
       return rejectWithValue('Failed to update task');
     }
@@ -72,7 +80,7 @@ export const updateTask = createAsyncThunk(
 // Async action to delete a task
 export const deleteTask = createAsyncThunk('tasks/deleteTask', async (id: number, { rejectWithValue }) => {
   try {
-    // Simulate API call for delete if needed
+    await deleteTodo(id);
     return id; // Return the id for deletion
   } catch (error) {
     return rejectWithValue('Failed to delete task');
@@ -99,16 +107,16 @@ const tasksSlice = createSlice({
       })
       .addCase(fetchTasks.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.tasks = action.payload;  // Save fetched tasks with random priorities
+        state.tasks = action.payload;
       })
       .addCase(fetchTasks.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
       })
       
-      // Add Task to API and Locally
+      // Add Task
       .addCase(addTask.fulfilled, (state, action) => {
-        state.tasks.push(action.payload);  // Push the new task into the Redux store
+        state.tasks.push(action.payload);
       })
       .addCase(addTask.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -119,14 +127,14 @@ const tasksSlice = createSlice({
         const { id, changes } = action.payload;
         const index = state.tasks.findIndex((t) => t.id === id);
         if (index !== -1) {
-          state.tasks[index] = { ...state.tasks[index], ...changes };  // Update task with changes
+          state.tasks[index] = { ...state.tasks[index], ...changes };
         }
       })
       
       // Delete Task
       .addCase(deleteTask.fulfilled, (state, action) => {
         const id = action.payload;
-        state.tasks = state.tasks.filter((t) => t.id !== id);  // Remove deleted task
+        state.tasks = state.tasks.filter((t) => t.id !== id);
       });
   },
 });

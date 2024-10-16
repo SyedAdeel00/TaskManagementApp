@@ -12,7 +12,7 @@ export const fetchTodoById = async (id: number) => {
   return await response.json();
 };
 
-// API call to add a task (send only the required fields)
+// API call to add a task (send only the required fields to API: 'todo' as title, 'completed', and 'userId')
 export const addTodo = async (task: { todo: string; completed: boolean; userId: number }) => {
   const response = await fetch(`${API_URL}/add`, {
     method: 'POST',
@@ -28,8 +28,8 @@ export const addTodo = async (task: { todo: string; completed: boolean; userId: 
   return newTask;
 };
 
-// Update a task
-export const updateTodo = async (id: number, changes: Partial<Task>) => {
+// Update a task (send changes to API, handle local fields separately)
+export const updateTodo = async (id: number, changes: Partial<{ todo: string; completed: boolean }>) => {
   const response = await fetch(`${API_URL}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

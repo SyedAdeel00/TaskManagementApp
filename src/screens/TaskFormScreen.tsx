@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { addTask } from '../store/taskSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTask, updateTask } from '../store/taskSlice';
+import { RootState } from '../store';
 import PrioritySelector from '../components/PrioritySelector';
 import { isFutureDate } from '../utils/DateUtils';
 
 const TaskFormScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [deadline, setDeadline] = useState('');
-  const [priority, setPriority] = useState('Low');
+  const { taskId } = route.params || {};
+  const task = useSelector((state: RootState) => 
+    state.tasks.tasks.find(t => t.id === taskId)
+  );
+
+  const [title, setTitle] = useState(task ? task.todo : '');
+  const [description, setDescription] = useState(task ? task.description : '');
+  const [deadline, setDeadline] = useState(task ? task.deadline : '');
+  const [priority, setPriority] = useState(task ? task.priority : 'Low');
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
@@ -20,16 +26,23 @@ const TaskFormScreen = ({ route, navigation }) => {
 
   const handleSubmit = () => {
     if (isValid) {
-      // Dispatch the action to add the task (both to API and locally)
-      dispatch(addTask({
-        title,
-        completed: false,
-        userId: 5, // Assuming userId is static or dynamic
-        priority,
-        deadline,
-        description,
-      }));
-
+      if (task) {
+        // If editing an existing task
+        dispatch(updateTask({
+          id: taskId,
+          changes: { title, completed: task.completed, priority, deadline, description }
+        }));
+      } else {
+        // If adding a new task
+        dispatch(addTask({
+          title,
+          completed: false,
+          userId: 5, // Assuming userId is static or dynamic
+          priority,
+          deadline,
+          description,
+        }));
+      }
       navigation.goBack();
     }
   };
@@ -60,7 +73,7 @@ const TaskFormScreen = ({ route, navigation }) => {
         onPress={handleSubmit}
         disabled={!isValid}
       >
-        <Text style={styles.buttonText}>Add Task</Text>
+        <Text style={styles.buttonText}>{task ? 'Update Task' : 'Add Task'}</Text>
       </TouchableOpacity>
     </View>
   );
