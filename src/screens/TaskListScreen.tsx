@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTasks } from '../store/taskSlice';
 import TaskItem from '../components/TaskItem';
 import { RootState } from '../store';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const TaskListScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const { tasks, status, error } = useSelector((state: RootState) => state.tasks);
+  const { tasks, status } = useSelector((state: RootState) => state.tasks);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
@@ -32,7 +33,17 @@ const TaskListScreen = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.greeting}>Good Morning,</Text>
+          <Text style={styles.userName}>User!</Text>
+        </View>
+        <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+          <Icon name="person-circle-outline" size={40} color="#000" />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.filterContainer}>
         <TouchableOpacity onPress={() => setFilter('all')}>
           <Text style={[styles.filterText, filter === 'all' && styles.activeFilter]}>All</Text>
@@ -44,6 +55,7 @@ const TaskListScreen = ({ navigation }) => {
           <Text style={[styles.filterText, filter === 'completed' && styles.activeFilter]}>Completed</Text>
         </TouchableOpacity>
       </View>
+
       <FlatList
         data={filteredTasks}
         renderItem={({ item }) => (
@@ -52,22 +64,37 @@ const TaskListScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
           />
         )}
-        keyExtractor={(item) => item.id.toString()} // Ensure the id exists
+        keyExtractor={(item) => item.id.toString()}
       />
+
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate('TaskForm')}
       >
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F2F2F7',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+  },
+  greeting: {
+    fontSize: 16,
+    color: '#666',
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: 'bold',
   },
   filterContainer: {
     flexDirection: 'row',
