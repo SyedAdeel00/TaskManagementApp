@@ -13,6 +13,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onPress }) => {
       <View style={styles.container}>
         <Text style={styles.title}>{task.todo}</Text>
         <Text style={styles.priorityTag}>Priority: {task.priority}</Text>
+        <Text style={styles.deadlineTag}>Deadline: {task.deadline}</Text>
+        <Text style={styles.descriptionTag}>Description: {task.description}</Text>
         <Text style={[styles.status, task.completed ? styles.completed : styles.pending]}>
           {task.completed ? 'Completed' : 'Pending'}
         </Text>
@@ -36,6 +38,16 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 5,
     fontWeight: 'bold',
+  },
+  deadlineTag: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
+  },
+  descriptionTag: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
   },
   status: {
     fontSize: 14,

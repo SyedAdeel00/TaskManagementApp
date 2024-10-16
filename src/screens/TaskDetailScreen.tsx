@@ -28,8 +28,8 @@ const TaskDetailScreen = ({ route, navigation }) => {
     <View style={styles.container}>
       <Text style={styles.title}>{task.todo}</Text>
       <Text style={styles.priority}>Priority: {task.priority}</Text>
-      <Text style={styles.deadline}>Deadline: {task.deadline || 'No deadline set'}</Text>
-      <Text style={styles.description}>Description: {task.description || 'No description available'}</Text>
+      <Text style={styles.deadline}>Deadline: {task.deadline}</Text>
+      <Text style={styles.description}>Description: {task.description}</Text>
       <Text style={styles.status}>Status: {task.completed ? 'Completed' : 'Pending'}</Text>
       <TouchableOpacity style={styles.button} onPress={handleToggleCompletion}>
         <Text style={styles.buttonText}>
@@ -64,13 +64,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   deadline: {
-    fontSize: 18,
-    color: '#555',
+    fontSize: 16,
     marginBottom: 10,
   },
   description: {
     fontSize: 16,
-    color: '#666',
     marginBottom: 10,
   },
   status: {

@@ -20,7 +20,6 @@ const TaskFormScreen = ({ route, navigation }) => {
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
-    // Ensure form is valid when title and deadline are filled correctly
     setIsValid(title.trim().length > 0 && isFutureDate(deadline));
   }, [title, deadline]);
 
@@ -30,7 +29,13 @@ const TaskFormScreen = ({ route, navigation }) => {
         // If editing an existing task
         dispatch(updateTask({
           id: taskId,
-          changes: { title, completed: task.completed, priority, deadline, description }
+          changes: { 
+            todo: title, // This should be 'todo' for the API
+            completed: task.completed, 
+            priority, 
+            deadline, 
+            description 
+          }
         }));
       } else {
         // If adding a new task

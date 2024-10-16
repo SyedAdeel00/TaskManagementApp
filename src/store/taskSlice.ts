@@ -20,31 +20,42 @@ const getRandomPriority = (): 'Low' | 'Medium' | 'High' => {
   return priorities[Math.floor(Math.random() * priorities.length)];
 };
 
-// Async action to fetch tasks and assign random priorities locally
+// Function to generate a default description if missing
+const getDefaultDescription = (): string => 'No description available';
+
+// Function to generate a default deadline (7 days from today)
+const getDefaultDeadline = (): string => {
+  const date = new Date();
+  date.setDate(date.getDate() + 7);
+  return date.toISOString().split('T')[0]; // Format YYYY-MM-DD
+};
+
+// Async action to fetch tasks and assign random priorities, default deadlines, and descriptions
 export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (_, { rejectWithValue }) => {
   try {
     const response = await fetchTodos();
-    const tasksWithPriority = response.todos.map((task) => ({
+    const tasksWithDefaults = response.todos.map((task) => ({
       ...task,
-      priority: getRandomPriority(),  // Assign random priority locally
-      deadline: task.deadline || '',  // Initialize deadline
-      description: task.description || '',  // Initialize description
+      priority: getRandomPriority(),  // Assign random priority
+      deadline: task.deadline || getDefaultDeadline(),  // Assign default deadline if missing
+      description: task.description || getDefaultDescription(),  // Assign default description if missing
     }));
-    return tasksWithPriority;
+    return tasksWithDefaults;
   } catch (error) {
     return rejectWithValue('Failed to fetch tasks');
   }
 });
 
 // Async action to add a task to the API and locally
-export const addTask = createAsyncThunk('tasks/addTask', async (taskData: { title: string, completed: boolean, userId: number, priority: string, deadline: string, description: string }, { rejectWithValue }) => {
+export const addTask = createAsyncThunk('tasks/addTask', async (taskData: { title: string; completed: boolean; userId: number; priority: string; deadline: string; description: string }, { rejectWithValue }) => {
   try {
     const response = await addTodo({
       todo: taskData.title,
       completed: taskData.completed,
-      userId: taskData.userId
+      userId: taskData.userId,
     });
 
+    // Return the full task with additional fields stored locally
     return {
       ...response,          // API response: id, todo, completed, userId
       priority: taskData.priority,
@@ -62,14 +73,15 @@ export const updateTask = createAsyncThunk(
   async ({ id, changes }: { id: number; changes: Partial<Task> }, { rejectWithValue }) => {
     try {
       const response = await updateTodo(id, {
-        todo: changes.title,
-        completed: changes.completed
+        todo: changes.todo,  // Ensure 'todo' is sent to the API
+        completed: changes.completed,
       });
 
+      // Merge the response with local changes
       return {
         id,
         ...response,
-        ...changes, // Include local fields
+        ...changes, // Include local fields (priority, description, deadline)
       };
     } catch (error) {
       return rejectWithValue('Failed to update task');
@@ -107,7 +119,7 @@ const tasksSlice = createSlice({
       })
       .addCase(fetchTasks.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.tasks = action.payload;
+        state.tasks = action.payload;  // Store fetched tasks with default values
       })
       .addCase(fetchTasks.rejected, (state, action) => {
         state.status = 'failed';
@@ -116,7 +128,7 @@ const tasksSlice = createSlice({
       
       // Add Task
       .addCase(addTask.fulfilled, (state, action) => {
-        state.tasks.push(action.payload);
+        state.tasks.push(action.payload);  // Add the new task to the store
       })
       .addCase(addTask.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -127,14 +139,14 @@ const tasksSlice = createSlice({
         const { id, changes } = action.payload;
         const index = state.tasks.findIndex((t) => t.id === id);
         if (index !== -1) {
-          state.tasks[index] = { ...state.tasks[index], ...changes };
+          state.tasks[index] = { ...state.tasks[index], ...changes }; // Update the task with changes
         }
       })
       
       // Delete Task
       .addCase(deleteTask.fulfilled, (state, action) => {
         const id = action.payload;
-        state.tasks = state.tasks.filter((t) => t.id !== id);
+        state.tasks = state.tasks.filter((t) => t.id !== id);  // Remove deleted task
       });
   },
 });
