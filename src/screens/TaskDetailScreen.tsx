@@ -28,7 +28,7 @@ const TaskDetailScreen = ({ route, navigation }) => {
     <View style={styles.container}>
       <Text style={styles.title}>{task.todo}</Text>
       <Text style={styles.priority}>Priority: {task.priority}</Text>
-      <Text style={styles.deadline}>Deadline: {task.deadline}</Text>
+      <Text style={styles.deadline}>Deadline:{task.deadline} ? {task.deadline} : Hi Adeel</Text>
       <Text style={styles.description}>Description: {task.description}</Text>
       <Text style={styles.status}>Status: {task.completed ? 'Completed' : 'Pending'}</Text>
       <TouchableOpacity style={styles.button} onPress={handleToggleCompletion}>

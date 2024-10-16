@@ -20,16 +20,6 @@ const getRandomPriority = (): 'Low' | 'Medium' | 'High' => {
   return priorities[Math.floor(Math.random() * priorities.length)];
 };
 
-// Function to generate a default description if missing
-const getDefaultDescription = (): string => 'No description available';
-
-// Function to generate a default deadline (7 days from today)
-const getDefaultDeadline = (): string => {
-  const date = new Date();
-  date.setDate(date.getDate() + 7);
-  return date.toISOString().split('T')[0]; // Format YYYY-MM-DD
-};
-
 // Async action to fetch tasks and assign random priorities, default deadlines, and descriptions
 export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (_, { rejectWithValue }) => {
   try {
@@ -37,8 +27,8 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (_, { rejec
     const tasksWithDefaults = response.todos.map((task) => ({
       ...task,
       priority: getRandomPriority(),  // Assign random priority
-      deadline: task.deadline || getDefaultDeadline(),  // Assign default deadline if missing
-      description: task.description || getDefaultDescription(),  // Assign default description if missing
+      deadline: task.deadline || '',  // Initialize deadline
+      description: task.description || '',  // Initialize description
     }));
     return tasksWithDefaults;
   } catch (error) {
@@ -57,7 +47,7 @@ export const addTask = createAsyncThunk('tasks/addTask', async (taskData: { titl
 
     // Return the full task with additional fields stored locally
     return {
-      ...response,          // API response: id, todo, completed, userId
+      ...response,
       priority: taskData.priority,
       deadline: taskData.deadline,
       description: taskData.description,
@@ -73,15 +63,14 @@ export const updateTask = createAsyncThunk(
   async ({ id, changes }: { id: number; changes: Partial<Task> }, { rejectWithValue }) => {
     try {
       const response = await updateTodo(id, {
-        todo: changes.todo,  // Ensure 'todo' is sent to the API
-        completed: changes.completed,
+        todo: changes.todo, // Update the todo field in API
+        completed: changes.completed, // Update completion status in API
       });
 
-      // Merge the response with local changes
+      // Return the id and merge changes for local update
       return {
         id,
-        ...response,
-        ...changes, // Include local fields (priority, description, deadline)
+        ...changes, // Include local fields for updating
       };
     } catch (error) {
       return rejectWithValue('Failed to update task');
@@ -136,7 +125,7 @@ const tasksSlice = createSlice({
       
       // Update Task
       .addCase(updateTask.fulfilled, (state, action) => {
-        const { id, changes } = action.payload;
+        const { id, ...changes } = action.payload; // Destructure to get id and changes
         const index = state.tasks.findIndex((t) => t.id === id);
         if (index !== -1) {
           state.tasks[index] = { ...state.tasks[index], ...changes }; // Update the task with changes
