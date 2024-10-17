@@ -14,15 +14,14 @@ const TaskListScreen = ({ navigation }) => {
 
     useEffect(() => {
         dispatch(fetchTasks()).then(() => {
-            setTimeout(() => setLoading(false), 2000);  // Show loader for 2 seconds
+            setTimeout(() => setLoading(false), 2000);
         });
     }, [dispatch]);
 
-    // Filter tasks based on the selected filter
     const filteredTasks = tasks.filter(task => {
         if (filter === 'completed') return task.completed;
         if (filter === 'pending') return !task.completed;
-        return true; // Return all tasks for 'all' filter
+        return true;
     });
 
     if (loading || status === 'loading') {
@@ -33,6 +32,16 @@ const TaskListScreen = ({ navigation }) => {
         );
     }
 
+    const renderTaskItem = ({ item }) => (
+      <TouchableOpacity
+      style={styles.taskItemContainer}
+      onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
+    >
+      <TaskItem task={item} />
+    </TouchableOpacity>
+    
+    );
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
@@ -41,15 +50,14 @@ const TaskListScreen = ({ navigation }) => {
                     <Text style={styles.userName}>User!</Text>
                 </View>
                 <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                    <Icon name="person-circle-outline" size={40} color="#000" />
+                    <Icon name="person-circle-outline" size={40} color="#fff" />
                 </TouchableOpacity>
             </View>
 
-            {/* Search Bar UI (without functionality) */}
             <TextInput
                 style={styles.searchInput}
                 placeholder="Search tasks..."
-                // Removed value and onChangeText to disable functionality
+                placeholderTextColor="#999"
             />
 
             <View style={styles.filterContainer}>
@@ -63,16 +71,13 @@ const TaskListScreen = ({ navigation }) => {
                     <Text style={[styles.filterText, filter === 'completed' && styles.activeFilter]}>Completed</Text>
                 </TouchableOpacity>
             </View>
-
             <FlatList
+                key="twoColumnList"
                 data={filteredTasks}
-                renderItem={({ item }) => (
-                    <TaskItem
-                        task={item}
-                        onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
-                    />
-                )}
+                renderItem={renderTaskItem}
                 keyExtractor={(item) => item.id.toString()}
+                numColumns={2}
+                columnWrapperStyle={styles.row}
             />
 
             <TouchableOpacity
@@ -88,7 +93,7 @@ const TaskListScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: '#1E1E1E',
     },
     header: {
         flexDirection: 'row',
@@ -98,37 +103,53 @@ const styles = StyleSheet.create({
     },
     greeting: {
         fontSize: 16,
-        color: '#666',
+        color: '#B0B0B0',
     },
     userName: {
         fontSize: 24,
         fontWeight: 'bold',
+        color: '#FFFFFF',
     },
     searchInput: {
         height: 40,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 5,
-        paddingHorizontal: 10,
+        backgroundColor: '#2C2C2C',
+        borderRadius: 20,
+        paddingHorizontal: 15,
         margin: 10,
+        color: '#FFFFFF',
     },
     filterContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         padding: 10,
-        backgroundColor: '#fff',
+        backgroundColor: '#2C2C2C',
+        borderRadius: 20,
+        margin: 10,
     },
     filterText: {
         fontSize: 16,
+        color: '#B0B0B0',
     },
     activeFilter: {
         fontWeight: 'bold',
-        color: '#007AFF',
+        color: '#FFF',
     },
     loaderContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#1E1E1E',
+    },
+    row: {
+        flex: 1,
+        justifyContent: 'space-around',
+    },
+    taskItemContainer: {
+        flex: 0.48,
+        margin: 5,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 15,
+        padding: 15,
     },
     addButton: {
         position: 'absolute',
@@ -140,9 +161,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#007AFF',
         justifyContent: 'center',
         alignItems: 'center',
+        elevation: 5,
     },
     addButtonText: {
-        color: '#fff',
+        color: '#FFFFFF',
         fontSize: 24,
         fontWeight: 'bold',
     },

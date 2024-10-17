@@ -1,37 +1,36 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Task } from '../types/task';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 
 interface TaskItemProps {
   task: Task;
-  onPress: () => void;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ task, onPress }) => {
+const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
   return (
-    <TouchableOpacity onPress={onPress}>
-      <View style={styles.container}>
-        <Text style={styles.title}>{task.todo}</Text>
-        <Text style={styles.priorityTag}>Priority: {task.priority}</Text>
-        <Text style={styles.deadlineTag}>Deadline: {task.deadline}</Text>
-        <Text style={styles.descriptionTag}>Description: {task.description}</Text>
-        <Text style={[styles.status, task.completed ? styles.completed : styles.pending]}>
-          {task.completed ? 'Completed' : 'Pending'}
-        </Text>
-      </View>
-    </TouchableOpacity>
+    <View style={styles.container}>
+      <Text style={styles.title}>{task.todo}</Text>
+      <Text style={styles.priorityTag}>Priority: {task.priority}</Text>
+      {/* <Text style={styles.deadlineTag}>{task.deadline}</Text> */}
+      {/* <Text style={styles.descriptionTag}>Description: {task.description}</Text> */}
+      <Text style={[styles.status, task.completed ? styles.completed : styles.pending]}>
+        {task.completed ? 'Completed' : 'Pending'}
+      </Text>
+      <Icon name="person-circle-outline" size={40} color="#000" />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    padding: 15,
-    borderBottomWidth: 1,
+    padding: 12,
     borderBottomColor: '#eee',
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
   },
   priorityTag: {
     fontSize: 14,
