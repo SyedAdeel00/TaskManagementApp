@@ -13,7 +13,7 @@ const TaskListScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        dispatch(fetchTasks()).then(() => {
+        return dispatch(fetchTasks()).then(() => {
             setTimeout(() => setLoading(false), 2000);
         });
     }, [dispatch]);
@@ -33,14 +33,14 @@ const TaskListScreen = ({ navigation }) => {
     }
 
     const renderTaskItem = ({ item }) => (
-      <TouchableOpacity
-      style={styles.taskItemContainer}
-      onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
-    >
-      <TaskItem task={item} />
-    </TouchableOpacity>
-    
-    );
+        <TouchableOpacity
+        style={styles.taskItemContainer}
+        onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
+      >
+        <TaskItem task={item} />
+      </TouchableOpacity>
+      
+      );
 
     return (
         <SafeAreaView style={styles.container}>
