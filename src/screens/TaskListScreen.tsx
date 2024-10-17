@@ -25,7 +25,7 @@ const TaskListScreen = ({ navigation }) => {
         return true;
     });
 
-    const isLoading = status === 'loading'; // or you can add a custom loading state if needed
+    const isLoading = status === 'loading';
 
     if (isLoading) {
         return (

@@ -8,10 +8,9 @@ interface TaskItemProps {
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
-  // Log the updated task whenever it changes
   useEffect(() => {
     console.log("Updated Task:", task);
-  }, [task]); // Run effect when 'task' changes
+  }, [task]); 
 
   return (
     <View style={styles.container}>

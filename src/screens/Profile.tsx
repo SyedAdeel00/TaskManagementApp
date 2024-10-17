@@ -1,26 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const Profile = ({ navigation }) => {
+const Profile = () => {
   const user = {
-    name: 'Dimitar',
-    email: 'dimitar@example.com',
+    name: 'Syed Adeel',
+    email: 'syedadeelashraf123@gmail.com',
     bio: 'A passionate developer with experience in React Native and Redux.',
-    profilePicture: 'https://example.com/profile.jpg', // Replace with a valid URL or local image
   };
 
   return (
     <View style={styles.container}>
-      <Image source={{ uri: user.profilePicture }} style={styles.profilePicture} />
       <Text style={styles.name}>{user.name}</Text>
       <Text style={styles.email}>{user.email}</Text>
       <Text style={styles.bio}>{user.bio}</Text>
-
-      <TouchableOpacity style={styles.editButton} onPress={() => navigation.navigate('EditProfile')}>
-        <Icon name="create-outline" size={20} color="#FFF" />
-        <Text style={styles.editButtonText}>Edit Profile</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -30,7 +23,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#000',
     padding: 20,
   },
   profilePicture: {
@@ -46,27 +39,14 @@ const styles = StyleSheet.create({
   },
   email: {
     fontSize: 16,
-    color: '#666',
+    color: '#FFFFFF',
     marginBottom: 10,
   },
   bio: {
     fontSize: 14,
-    color: '#666',
+    color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 20,
-  },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  editButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    marginLeft: 10,
   },
 });
 
