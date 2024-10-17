@@ -6,6 +6,7 @@ import { RootState } from '../store';
 import PrioritySelector from '../components/PrioritySelector';
 import { isFutureDate } from '../utils/DateUtils';
 import Icon from 'react-native-vector-icons/Ionicons';
+import DatePicker from 'react-native-date-picker';
 
 const TaskFormScreen = ({ route, navigation }) => {
   const dispatch = useDispatch();
@@ -16,9 +17,10 @@ const TaskFormScreen = ({ route, navigation }) => {
 
   const [title, setTitle] = useState(task ? task.todo : '');
   const [description, setDescription] = useState(task ? task.description : '');
-  const [deadline, setDeadline] = useState(task ? task.deadline : '');
+  const [deadline, setDeadline] = useState(task ? new Date(task.deadline) : new Date());
   const [priority, setPriority] = useState(task ? task.priority : 'Low');
   const [isValid, setIsValid] = useState(false);
+  const [open, setOpen] = useState(false); // State to control the DatePicker visibility
 
   useEffect(() => {
     setIsValid(title.trim().length > 0 && isFutureDate(deadline));
@@ -26,26 +28,19 @@ const TaskFormScreen = ({ route, navigation }) => {
 
   const handleSubmit = () => {
     if (isValid) {
+      const taskData = {
+        title,
+        completed: task ? task.completed : false,
+        userId: 5,
+        priority,
+        deadline: deadline.toISOString().split('T')[0], // Format date as YYYY-MM-DD
+        description,
+      };
+
       if (task) {
-        dispatch(updateTask({
-          id: taskId,
-          changes: {
-            todo: title, 
-            completed: task.completed,
-            priority,
-            deadline,
-            description
-          }
-        }));
+        dispatch(updateTask({ id: taskId, changes: taskData }));
       } else {
-        dispatch(addTask({
-          title,
-          completed: false,
-          userId: 5,
-          priority,
-          deadline,
-          description,
-        }));
+        dispatch(addTask(taskData));
       }
       navigation.goBack();
     }
@@ -55,7 +50,7 @@ const TaskFormScreen = ({ route, navigation }) => {
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="chevron-back" size={30} color="#FFFFFF" />
-        <Text style={{color:'#FFFFFF', fontSize:28, marginLeft:20}}>Add/Edit Task</Text>
+        <Text style={{ color: '#FFFFFF', fontSize: 28, marginLeft: 20 }}>Add/Edit Task</Text>
       </TouchableOpacity>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>{task ? 'Edit Task' : 'Add New Task'}</Text>
@@ -73,12 +68,24 @@ const TaskFormScreen = ({ route, navigation }) => {
           placeholder="Task Description (optional)"
           placeholderTextColor="#B0B0B0"
         />
-        <TextInput
-          style={styles.input}
-          value={deadline}
-          onChangeText={setDeadline}
-          placeholder="Deadline (YYYY-MM-DD)"
-          placeholderTextColor="#B0B0B0"
+        <TouchableOpacity style={styles.input} onPress={() => setOpen(true)}>
+          <Text style={{ color: deadline ? '#000' : '#B0B0B0' }}>
+            {deadline ? deadline.toISOString().split('T')[0] : 'Select Deadline (YYYY-MM-DD)'}
+          </Text>
+        </TouchableOpacity>
+        <DatePicker
+          modal
+          open={open}
+          date={deadline}
+          mode="date"
+          minimumDate={new Date(new Date().setDate(new Date().getDate() + 1))} // Disable current date
+          onConfirm={(date) => {
+            setOpen(false);
+            setDeadline(date);
+          }}
+          onCancel={() => {
+            setOpen(false);
+          }}
         />
         <PrioritySelector priority={priority} onSelect={setPriority} />
         <TouchableOpacity
@@ -100,7 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E1E1E',
   },
   backButton: {
-    flexDirection:'row',
+    flexDirection: 'row',
     marginBottom: 20,
   },
   header: {
@@ -119,7 +126,7 @@ const styles = StyleSheet.create({
     color: '#000000',
     marginBottom: 20,
   },
-  inputDescription:{
+  inputDescription: {
     borderWidth: 1,
     borderColor: '#B0B0B0',
     padding: 20,
