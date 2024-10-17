@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Task } from '../types/task';
 import Icon from 'react-native-vector-icons/Ionicons';
-
 
 interface TaskItemProps {
   task: Task;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({ task }) => {
+  // Log the updated task whenever it changes
+  useEffect(() => {
+    console.log("Updated Task:", task);
+  }, [task]); // Run effect when 'task' changes
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{task.todo}</Text>

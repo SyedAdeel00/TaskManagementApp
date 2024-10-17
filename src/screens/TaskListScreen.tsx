@@ -10,12 +10,13 @@ const TaskListScreen = ({ navigation }) => {
     const dispatch = useDispatch();
     const { tasks, status } = useSelector((state: RootState) => state.tasks);
     const [filter, setFilter] = useState('all');
-    const [loading, setLoading] = useState(true);
-
+    
     useEffect(() => {
-        return dispatch(fetchTasks()).then(() => {
-            setTimeout(() => setLoading(false), 2000);
-        });
+        const fetchData = async () => {
+            await dispatch(fetchTasks());
+        };
+        
+        fetchData();
     }, [dispatch]);
 
     const filteredTasks = tasks.filter(task => {
@@ -24,7 +25,9 @@ const TaskListScreen = ({ navigation }) => {
         return true;
     });
 
-    if (loading || status === 'loading') {
+    const isLoading = status === 'loading'; // or you can add a custom loading state if needed
+
+    if (isLoading) {
         return (
             <View style={styles.loaderContainer}>
                 <ActivityIndicator size="large" color="#007AFF" />
@@ -34,13 +37,12 @@ const TaskListScreen = ({ navigation }) => {
 
     const renderTaskItem = ({ item }) => (
         <TouchableOpacity
-        style={styles.taskItemContainer}
-        onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
-      >
-        <TaskItem task={item} />
-      </TouchableOpacity>
-      
-      );
+            style={styles.taskItemContainer}
+            onPress={() => navigation.navigate('TaskDetail', { taskId: item.id })}
+        >
+            <TaskItem task={item} />
+        </TouchableOpacity>
+    );
 
     return (
         <SafeAreaView style={styles.container}>
