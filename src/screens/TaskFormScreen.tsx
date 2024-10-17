@@ -19,13 +19,28 @@ const TaskFormScreen = ({ route, navigation }) => {
   const [deadline, setDeadline] = useState(task ? task.deadline : '');
   const [priority, setPriority] = useState(task ? task.priority : 'Low');
   const [isValid, setIsValid] = useState(false);
+  const [errors, setErrors] = useState({ title: '', deadline: '' });
 
   useEffect(() => {
-    setIsValid(title.trim().length > 0 && isFutureDate(deadline));
+    let valid = true;
+    const newErrors = { title: '', deadline: '' };
+
+    if (title.trim().length === 0) {
+      newErrors.title = 'Task title is required.';
+      valid = false;
+    }
+
+    if (!isFutureDate(deadline)) {
+      newErrors.deadline = 'Deadline must be a future date.';
+      valid = false;
+    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(deadline)) {
+      newErrors.deadline = 'Deadline must be in YYYY-MM-DD format.';
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    setIsValid(valid);
   }, [title, deadline]);
-  const generateUniqueId = () => {
-    return Math.floor(100 + Math.random() * 900);
-  };
 
   const handleSubmit = () => {
     if (isValid) {
@@ -33,12 +48,12 @@ const TaskFormScreen = ({ route, navigation }) => {
         dispatch(updateTask({
           id: taskId,
           changes: {
-            todo: title, 
+            todo: title,
             completed: task.completed,
             priority,
             deadline,
-            description
-          }
+            description,
+          },
         }));
       } else {
         dispatch(addTask({
@@ -58,10 +73,11 @@ const TaskFormScreen = ({ route, navigation }) => {
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="chevron-back" size={30} color="#FFFFFF" />
-        <Text style={{color:'#FFFFFF', fontSize:28, marginLeft:20}}>Add/Edit Task</Text>
+        <Text style={{ color: '#FFFFFF', fontSize: 28, marginLeft: 20 }}>Add/Edit Task</Text>
       </TouchableOpacity>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>{task ? 'Edit Task' : 'Add New Task'}</Text>
+        
         <TextInput
           style={styles.input}
           value={title}
@@ -69,6 +85,8 @@ const TaskFormScreen = ({ route, navigation }) => {
           placeholder="Task Title"
           placeholderTextColor="#B0B0B0"
         />
+        {errors.title ? <Text style={styles.errorText}>{errors.title}</Text> : null}
+
         <TextInput
           style={styles.inputDescription}
           value={description}
@@ -76,6 +94,7 @@ const TaskFormScreen = ({ route, navigation }) => {
           placeholder="Task Description (optional)"
           placeholderTextColor="#B0B0B0"
         />
+
         <TextInput
           style={styles.input}
           value={deadline}
@@ -83,7 +102,10 @@ const TaskFormScreen = ({ route, navigation }) => {
           placeholder="Deadline (YYYY-MM-DD)"
           placeholderTextColor="#B0B0B0"
         />
+        {errors.deadline ? <Text style={styles.errorText}>{errors.deadline}</Text> : null}
+
         <PrioritySelector priority={priority} onSelect={setPriority} />
+        
         <TouchableOpacity
           style={[styles.button, !isValid && styles.disabledButton]}
           onPress={handleSubmit}
@@ -103,7 +125,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E1E1E',
   },
   backButton: {
-    flexDirection:'row',
+    flexDirection: 'row',
     marginBottom: 20,
   },
   header: {
@@ -122,7 +144,7 @@ const styles = StyleSheet.create({
     color: '#000000',
     marginBottom: 20,
   },
-  inputDescription:{
+  inputDescription: {
     borderWidth: 1,
     borderColor: '#B0B0B0',
     padding: 20,
@@ -146,6 +168,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10,
   },
 });
 
