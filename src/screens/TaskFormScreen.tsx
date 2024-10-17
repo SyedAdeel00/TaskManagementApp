@@ -67,7 +67,7 @@ const TaskFormScreen = ({ route, navigation }) => {
           placeholderTextColor="#B0B0B0"
         />
         <TextInput
-          style={styles.input}
+          style={styles.inputDescription}
           value={description}
           onChangeText={setDescription}
           placeholder="Task Description (optional)"
@@ -113,6 +113,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#B0B0B0',
     padding: 10,
+    fontSize: 18,
+    borderRadius: 6,
+    backgroundColor: '#FFFFFF',
+    color: '#000000',
+    marginBottom: 20,
+  },
+  inputDescription:{
+    borderWidth: 1,
+    borderColor: '#B0B0B0',
+    padding: 20,
     fontSize: 18,
     borderRadius: 6,
     backgroundColor: '#FFFFFF',
